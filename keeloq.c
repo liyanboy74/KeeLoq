@@ -6,7 +6,7 @@ char nlf(int d)
 }
 
 void keeloq_encrypt(uint64_t *key, uint32_t *plaintext, uint32_t *ciphertext, int nrounds)
-{    
+{
     *ciphertext = *plaintext;
     unsigned char out, xor, nlf_input;
     for (int i = 0; i < nrounds; i++)
@@ -16,12 +16,12 @@ void keeloq_encrypt(uint64_t *key, uint32_t *plaintext, uint32_t *ciphertext, in
         out = nlf(nlf_input);
         xor = ((*key >> (i % 64)) & 0x1) ^ ((*ciphertext >> 16) & 0x1) ^ (*ciphertext & 0x1) ^ out;
         *ciphertext = (*ciphertext >> 1) | (xor << 31);
-    }    
+    }
 }
 
 void keeloq_decrypt(uint64_t *key, uint32_t *plaintext, uint32_t *ciphertext, int nrounds)
 {
-    *plaintext = *ciphertext;    
+    *plaintext = *ciphertext;
     char out, xor, nlf_input;
     for (int i = 0; i < nrounds; i++)
     {
@@ -30,5 +30,5 @@ void keeloq_decrypt(uint64_t *key, uint32_t *plaintext, uint32_t *ciphertext, in
         out = nlf(nlf_input);
         xor = ((*key >> ((15 - i) % 64)) & 0x1) ^ ((*plaintext >> 31) & 0x1) ^ ((*plaintext >> 15) & 0x1) ^ out;
         *plaintext = (*plaintext << 1) | xor;
-    }    
+    }
 }
