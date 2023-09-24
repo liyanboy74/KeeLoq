@@ -5,7 +5,7 @@ uint16_t nlf(uint16_t d)
     return (((uint32_t)(NLF_LOOKUP_CONSTANT) >> d) & 0x1);
 }
 
-void keeloq_encrypt(uint64_t *key, uint32_t *plaintext, uint32_t *ciphertext, uint16_t nrounds)
+void keeloq_encrypt(uint64_v *key, uint32_t *plaintext, uint32_t *ciphertext, uint16_t nrounds)
 {
     uint16_t out, xor, nlf_input,i,k,ki;
     *ciphertext = *plaintext;
@@ -29,7 +29,7 @@ void keeloq_encrypt(uint64_t *key, uint32_t *plaintext, uint32_t *ciphertext, ui
     }
 }
 
-void keeloq_decrypt(uint64_t *key, uint32_t *plaintext, uint32_t *ciphertext, uint16_t nrounds)
+void keeloq_decrypt(uint64_v *key, uint32_t *plaintext, uint32_t *ciphertext, uint16_t nrounds)
 {
     uint16_t out, xor, nlf_input,i,k,ki;
 	*plaintext = *ciphertext;
@@ -40,7 +40,7 @@ void keeloq_decrypt(uint64_t *key, uint32_t *plaintext, uint32_t *ciphertext, ui
 
         out = nlf(nlf_input);
 
-        ki=(15 - i) % 64;
+        ki=(uint16_t)(15 - i) % 64;
         #ifdef USE_VIRTUAL_UINT64_VARIABLE
         if(ki>31)k=(key->H>>(ki-32))&0x1;
         else k=(key->L>>ki)&0x1;
