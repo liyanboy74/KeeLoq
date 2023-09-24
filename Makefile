@@ -9,6 +9,6 @@ test:build
 	gcc test.c $(TARGET).o -o $(TARGET)
 
 run-test:test
-	$(TARGET)
+	./$(TARGET)
 clean:
 	rm $(TARGET) $(TARGET).o
