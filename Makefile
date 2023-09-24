@@ -1,10 +1,14 @@
 TARGET=keeloq
 
-default: build run
+default: run-test
 
 build:
-	gcc main.c keeloq.c -o $(TARGET)
-run:
+	gcc keeloq.c -c
+
+test:build
+	gcc test.c $(TARGET).o -o $(TARGET)
+
+run-test:test
 	$(TARGET)
 clean:
-	rm $(TARGET)
+	rm $(TARGET) $(TARGET).o
