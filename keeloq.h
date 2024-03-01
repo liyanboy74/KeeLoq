@@ -19,8 +19,16 @@ typedef uint64_t uint64_v ;
 #define KEELOQ_NROUNDS  528
 #define NLF_LOOKUP_CONSTANT 0x3a5c742e
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 uint16_t nlf(uint16_t d);
 void keeloq_encrypt(uint64_v *key, uint32_t *plaintext, uint32_t *ciphertext, uint16_t nrounds);
 void keeloq_decrypt(uint64_v *key, uint32_t *plaintext, uint32_t *ciphertext, uint16_t nrounds);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
