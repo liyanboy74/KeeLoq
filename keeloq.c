@@ -7,14 +7,14 @@ uint16_t nlf(uint16_t d)
 
 void keeloq_encrypt(uint64_v *key, uint32_t *plaintext, uint32_t *ciphertext, uint16_t nrounds)
 {
-    uint16_t out, xor, nlf_input,i,k,ki;
+    uint16_t o, x, nlf_input,i,k,ki;
     *ciphertext = *plaintext;
     for (i = 0; i < nrounds; i++)
     {
         nlf_input = (((*ciphertext >> 31) & 0x1) << 4) | (((*ciphertext >> 26) & 0x1) << 3) |
                     (((*ciphertext >> 20) & 0x1) << 2) | (((*ciphertext >> 9) & 0x1) << 1) | ((*ciphertext >> 1) & 0x1);
 
-        out = nlf(nlf_input);
+        o = nlf(nlf_input);
 
         ki=i % 64;
         #ifdef USE_VIRTUAL_UINT64_VARIABLE
@@ -24,21 +24,21 @@ void keeloq_encrypt(uint64_v *key, uint32_t *plaintext, uint32_t *ciphertext, ui
         k=((uint64_t)*key >> ki) & 0x1;
         #endif
 
-        xor = k ^ ((*ciphertext >> 16) & 0x1) ^ (*ciphertext & 0x1) ^ out;
-        *ciphertext = (*ciphertext >> 1) | ((uint32_t)(xor) << 31);
+        x = k ^ ((*ciphertext >> 16) & 0x1) ^ (*ciphertext & 0x1) ^ o;
+        *ciphertext = (*ciphertext >> 1) | ((uint32_t)(x) << 31);
     }
 }
 
 void keeloq_decrypt(uint64_v *key, uint32_t *plaintext, uint32_t *ciphertext, uint16_t nrounds)
 {
-    uint16_t out, xor, nlf_input,i,k,ki;
+    uint16_t o, x, nlf_input,i,k,ki;
 	*plaintext = *ciphertext;
     for (i = 0; i < nrounds; i++)
     {
         nlf_input = (((*plaintext >> 30) & 0x1) << 4) | (((*plaintext >> 25) & 0x1) << 3) |
                     (((*plaintext >> 19) & 0x1) << 2) | (((*plaintext >> 8) & 0x1) << 1) | (*plaintext & 0x1);
 
-        out = nlf(nlf_input);
+        o = nlf(nlf_input);
 
         ki=(uint16_t)(15 - i) % 64;
         #ifdef USE_VIRTUAL_UINT64_VARIABLE
@@ -48,7 +48,7 @@ void keeloq_decrypt(uint64_v *key, uint32_t *plaintext, uint32_t *ciphertext, ui
         k=((*key >> ki) & 0x1);
         #endif
 
-        xor = k ^ ((*plaintext >> 31) & 0x1) ^ ((*plaintext >> 15) & 0x1) ^ out;
-        *plaintext = (*plaintext << 1) | xor;
+        x = k ^ ((*plaintext >> 31) & 0x1) ^ ((*plaintext >> 15) & 0x1) ^ o;
+        *plaintext = (*plaintext << 1) | x;
     }
 }
