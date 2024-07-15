@@ -1,54 +1,44 @@
 #include "keeloq.h"
 
-uint16_t nlf(uint16_t d)
+uint8_t nlf(uint8_t d)
 {
     return (((uint32_t)(NLF_LOOKUP_CONSTANT) >> d) & 0x1);
 }
 
-void keeloq_encrypt(uint64_v *key, uint32_t *plaintext, uint32_t *ciphertext, uint16_t nrounds)
+void keeloq_encrypt(uint8_t *key, uint32_t *data, const uint16_t nrounds)
 {
-    uint16_t o, x, nlf_input,i,k,ki;
-    *ciphertext = *plaintext;
-    for (i = 0; i < nrounds; i++)
+    uint32_t x;
+    uint16_t loop;
+    uint8_t o, nlf_input,k,ki;
+
+    for (loop = 0; loop < nrounds; loop++)
     {
-        nlf_input = (((*ciphertext >> 31) & 0x1) << 4) | (((*ciphertext >> 26) & 0x1) << 3) |
-                    (((*ciphertext >> 20) & 0x1) << 2) | (((*ciphertext >> 9) & 0x1) << 1) | ((*ciphertext >> 1) & 0x1);
+        nlf_input = (((*data >> 31) & 0x1) << 4) | (((*data >> 26) & 0x1) << 3) |
+                    (((*data >> 20) & 0x1) << 2) | (((*data >> 9) & 0x1) << 1) | ((*data >> 1) & 0x1);
 
         o = nlf(nlf_input);
-
-        ki=i % 64;
-        #ifdef USE_VIRTUAL_UINT64_VARIABLE
-        if(ki>31)k=(key->H>>(ki-32))&0x1;
-        else k=(key->L>>ki)&0x1;
-        #else
-        k=((uint64_t)*key >> ki) & 0x1;
-        #endif
-
-        x = k ^ ((*ciphertext >> 16) & 0x1) ^ (*ciphertext & 0x1) ^ o;
-        *ciphertext = (*ciphertext >> 1) | ((uint32_t)(x) << 31);
+        ki=loop % 64;
+        k=key[ki/8]>>(ki%8);
+        x =k ^ (*data >> 16) ^ *data ^ o;
+        *data = (*data >> 1) | (x << 31);
     }
 }
 
-void keeloq_decrypt(uint64_v *key, uint32_t *plaintext, uint32_t *ciphertext, uint16_t nrounds)
+void keeloq_decrypt(uint8_t *key, uint32_t *data,const uint16_t nrounds)
 {
-    uint16_t o, x, nlf_input,i,k,ki;
-	*plaintext = *ciphertext;
-    for (i = 0; i < nrounds; i++)
+    uint32_t x;
+    uint16_t loop;
+    uint8_t o, nlf_input,k,ki;
+
+    for (loop = 0; loop < nrounds; loop++)
     {
-        nlf_input = (((*plaintext >> 30) & 0x1) << 4) | (((*plaintext >> 25) & 0x1) << 3) |
-                    (((*plaintext >> 19) & 0x1) << 2) | (((*plaintext >> 8) & 0x1) << 1) | (*plaintext & 0x1);
+        nlf_input = (((*data >> 30) & 0x1) << 4) | (((*data >> 25) & 0x1) << 3) |
+                    (((*data >> 19) & 0x1) << 2) | (((*data >> 8) & 0x1) << 1) | (*data & 0x1);
 
         o = nlf(nlf_input);
-
-        ki=(uint16_t)(15 - i) % 64;
-        #ifdef USE_VIRTUAL_UINT64_VARIABLE
-        if(ki>31)k=(key->H>>(ki-32))&0x1;
-        else k=(key->L>>ki)&0x1;
-        #else
-        k=((*key >> ki) & 0x1);
-        #endif
-
-        x = k ^ ((*plaintext >> 31) & 0x1) ^ ((*plaintext >> 15) & 0x1) ^ o;
-        *plaintext = (*plaintext << 1) | x;
+        ki=(uint16_t)(15 - loop) % 64;
+        k=key[ki/8]>>(ki%8);
+        x = k ^ (*data >> 31) ^ (*data >> 15) ^ o;
+        *data = (*data << 1) | x&1;
     }
 }
