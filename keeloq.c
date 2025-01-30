@@ -125,5 +125,5 @@ void keeloq_gen_secure_key(uint8_t *key,uint8_t *mf_key,uint32_t seed,uint32_t s
 
   ser &= 0x0fffffff;
   keeloq_decrypt(mf_key, &ser, KEELOQ_NROUNDS);
-  memccpy(&key[0],&ser,1,4);
+  memccpy(&key[4],&ser,1,4);
 }
