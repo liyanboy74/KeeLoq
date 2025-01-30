@@ -12,7 +12,6 @@ int test_simple()
     uint32_t ciphertext_ok=   0xe44f4cdf;
     uint32_t temp;
 
-
     printf("------- Simple test -------\r\n");
 
     temp=plaintext_ok;
@@ -53,13 +52,12 @@ int test_normal()
 
     // KEELOQ Key LSB-first
     uint8_t mf_key[]={0xef,0xcd,0xab,0x89,0x67,0x45,0x23,0x01};
-    uint8_t key[8];
     uint32_t ser=0x6C46ACA;
+    uint8_t key[8];
 
     uint32_t plaintext_ok=    0x1eca04b4;
     uint32_t ciphertext_ok=   0xecf4c92d;
     uint32_t temp;
-
 
     printf("------- Normal test -------\r\n");
 
@@ -98,11 +96,63 @@ int test_normal()
     return err;
 }
 
+int test_secure()
+{
+    int err=0;
+
+    // KEELOQ Key LSB-first
+    uint8_t mf_key[]={0xef,0xcd,0xab,0x89,0x67,0x45,0x23,0x01};
+    uint32_t ser=   0x0B6AF9A8;
+    uint32_t seed=  0x4380FD94;
+    uint8_t key[8];
+
+    uint32_t plaintext_ok=    0x95874b2c;
+    uint32_t ciphertext_ok=   0xc9ebe007;
+    uint32_t temp;
+
+    printf("------- Secure test -------\r\n");
+
+    temp=plaintext_ok;
+
+    printf("Text=0x%08x\r\n",temp);
+    printf("N=%d\r\n",KEELOQ_NROUNDS);
+
+    // Generate normal key
+    keeloq_gen_secure_key(key,mf_key,seed,ser);
+
+    // Encrypt plaintext to ciphertext
+    keeloq_encrypt(key,&temp,KEELOQ_NROUNDS);
+
+    printf("Encrypted to 0x%08x ",temp);
+    if(temp==ciphertext_ok) printf("[ OK ]");
+    else
+    {
+        printf("[ ERROR! ]");
+        err++;
+    }
+    printf("\r\n");
+
+    // Decrypt ciphertext to plaintext
+    keeloq_decrypt(key,&temp,KEELOQ_NROUNDS);
+
+    printf("Decrypted to 0x%08x ",temp);
+    if(temp==plaintext_ok) printf("[ OK ]");
+    else
+    {
+        printf("[ ERROR! ]");
+        err++;
+    }
+    printf("\r\n---------------------------\r\n");
+
+    return err;
+}
+
 int main()
 {
     int err=0;
     err= test_simple();
     err+=test_normal();
+    err+=test_secure();
 
     printf("Test Status : ");
     if(err)printf("FAIL!");
