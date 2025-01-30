@@ -71,7 +71,7 @@ void keeloq_decrypt(uint8_t *key, uint32_t *data,const uint16_t nrounds)
         ki=(uint16_t)(15 - loop) % 64;
         k=key[ki/8]>>(ki%8);
         x = k ^ (*data >> 31) ^ (*data >> 15) ^ o;
-        *data = (*data << 1) | x&1;
+        *data = (*data << 1) | (x&1);
     }
 }
 
