@@ -1,10 +1,11 @@
+#include <CUnit/CUnit.h>
+#include <CUnit/Basic.h>
+
 #include <stdio.h>
 #include "keeloq.h"
 
-int test_simple()
+void test_simple()
 {
-    int err=0;
-
     // KEELOQ Key LSB-first
     uint8_t key[]= {0x49,0xd9,0x9f,0xb7,0x01,0x67,0xec,0x5c};
 
@@ -12,44 +13,21 @@ int test_simple()
     uint32_t ciphertext_ok=   0xe44f4cdf;
     uint32_t temp;
 
-    printf("------- Simple test -------\r\n");
-
     temp=plaintext_ok;
-
-    printf("Text=0x%08x\r\n",temp);
-    printf("N=%d\r\n",KEELOQ_NROUNDS);
 
     // Encrypt plaintext to ciphertext
     keeloq_encrypt(key,&temp,KEELOQ_NROUNDS);
 
-    printf("Encrypted to 0x%08x ",temp);
-    if(temp==ciphertext_ok) printf("[ OK ]");
-    else
-    {
-        printf("[ ERROR! ]");
-        err++;
-    }
-    printf("\r\n");
+    CU_ASSERT_EQUAL(temp, ciphertext_ok);
 
     // Decrypt ciphertext to plaintext
     keeloq_decrypt(key,&temp,KEELOQ_NROUNDS);
 
-    printf("Decrypted to 0x%08x ",temp);
-    if(temp==plaintext_ok) printf("[ OK ]");
-    else
-    {
-        printf("[ ERROR! ]");
-        err++;
-    }
-    printf("\r\n---------------------------\r\n");
-
-    return err;
+    CU_ASSERT_EQUAL(temp, plaintext_ok);
 }
 
-int test_normal()
+void test_normal()
 {
-    int err=0;
-
     // KEELOQ Key LSB-first
     uint8_t mf_key[]={0xef,0xcd,0xab,0x89,0x67,0x45,0x23,0x01};
     uint32_t ser=0x6C46ACA;
@@ -59,12 +37,7 @@ int test_normal()
     uint32_t ciphertext_ok=   0xecf4c92d;
     uint32_t temp;
 
-    printf("------- Normal test -------\r\n");
-
     temp=plaintext_ok;
-
-    printf("Text=0x%08x\r\n",temp);
-    printf("N=%d\r\n",KEELOQ_NROUNDS);
 
     // Generate normal key
     keeloq_gen_normal_key(key,mf_key,ser);
@@ -72,34 +45,16 @@ int test_normal()
     // Encrypt plaintext to ciphertext
     keeloq_encrypt(key,&temp,KEELOQ_NROUNDS);
 
-    printf("Encrypted to 0x%08x ",temp);
-    if(temp==ciphertext_ok) printf("[ OK ]");
-    else
-    {
-        printf("[ ERROR! ]");
-        err++;
-    }
-    printf("\r\n");
+    CU_ASSERT_EQUAL(temp, ciphertext_ok);
 
     // Decrypt ciphertext to plaintext
     keeloq_decrypt(key,&temp,KEELOQ_NROUNDS);
 
-    printf("Decrypted to 0x%08x ",temp);
-    if(temp==plaintext_ok) printf("[ OK ]");
-    else
-    {
-        printf("[ ERROR! ]");
-        err++;
-    }
-    printf("\r\n---------------------------\r\n");
-
-    return err;
+    CU_ASSERT_EQUAL(temp, plaintext_ok);
 }
 
-int test_secure()
+void test_secure()
 {
-    int err=0;
-
     // KEELOQ Key LSB-first
     uint8_t mf_key[]={0xef,0xcd,0xab,0x89,0x67,0x45,0x23,0x01};
     uint32_t ser=   0x0B6AF9A8;
@@ -110,12 +65,7 @@ int test_secure()
     uint32_t ciphertext_ok=   0xc9ebe007;
     uint32_t temp;
 
-    printf("------- Secure test -------\r\n");
-
     temp=plaintext_ok;
-
-    printf("Text=0x%08x\r\n",temp);
-    printf("N=%d\r\n",KEELOQ_NROUNDS);
 
     // Generate secure key
     keeloq_gen_secure_key(key,mf_key,seed,ser);
@@ -123,41 +73,23 @@ int test_secure()
     // Encrypt plaintext to ciphertext
     keeloq_encrypt(key,&temp,KEELOQ_NROUNDS);
 
-    printf("Encrypted to 0x%08x ",temp);
-    if(temp==ciphertext_ok) printf("[ OK ]");
-    else
-    {
-        printf("[ ERROR! ]");
-        err++;
-    }
-    printf("\r\n");
+    CU_ASSERT_EQUAL(temp, ciphertext_ok);
 
     // Decrypt ciphertext to plaintext
     keeloq_decrypt(key,&temp,KEELOQ_NROUNDS);
 
-    printf("Decrypted to 0x%08x ",temp);
-    if(temp==plaintext_ok) printf("[ OK ]");
-    else
-    {
-        printf("[ ERROR! ]");
-        err++;
-    }
-    printf("\r\n---------------------------\r\n");
-
-    return err;
+    CU_ASSERT_EQUAL(temp, plaintext_ok);
 }
 
 int main()
 {
-    int err=0;
-    err= test_simple();
-    err+=test_normal();
-    err+=test_secure();
-
-    printf("Test Status : ");
-    if(err)printf("FAIL!");
-    else printf("PASS");
-    printf("\r\n---------------------------\r\n");
-
-    return err;
+    CU_initialize_registry();
+    CU_pSuite suite = CU_add_suite("Test Suite", 0, 0);
+    CU_add_test(suite, "Simple Test", test_simple);
+    CU_add_test(suite, "Normal Test", test_normal);
+    CU_add_test(suite, "Secure Test", test_secure);
+    CU_basic_set_mode(CU_BRM_VERBOSE);
+    CU_basic_run_tests();
+    CU_cleanup_registry();
+    return CU_get_error();
 }
