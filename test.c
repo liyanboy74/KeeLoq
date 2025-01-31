@@ -117,7 +117,7 @@ int test_secure()
     printf("Text=0x%08x\r\n",temp);
     printf("N=%d\r\n",KEELOQ_NROUNDS);
 
-    // Generate normal key
+    // Generate secure key
     keeloq_gen_secure_key(key,mf_key,seed,ser);
 
     // Encrypt plaintext to ciphertext
